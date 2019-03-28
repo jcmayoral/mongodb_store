@@ -100,8 +100,7 @@ public:
 		m_deleteClient(handle.serviceClient<mongodb_store_msgs::MongoDeleteMsg>(_servicePrefix + "/delete")),
 		m_insertPub(handle.advertise<mongodb_store_msgs::Insert>(_servicePrefix + "/insert", 100)),
 		m_database(_database),
-		m_collection("topological_maps")
-		//m_collection(_collection)
+		m_collection(_collection)
 	{
 		m_insertClient.waitForExistence();
 		m_updateClient.waitForExistence();
