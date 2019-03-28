@@ -100,9 +100,9 @@ public:
 		m_deleteClient(handle.serviceClient<mongodb_store_msgs::MongoDeleteMsg>(_servicePrefix + "/delete")),
 		m_insertPub(handle.advertise<mongodb_store_msgs::Insert>(_servicePrefix + "/insert", 100)),
 		m_database(_database),
-		m_collection(_collection)
+		m_collection("topological_maps")
+		//m_collection(_collection)
 	{
-
 		m_insertClient.waitForExistence();
 		m_updateClient.waitForExistence();
 		m_queryClient.waitForExistence();
@@ -124,6 +124,9 @@ public:
 
 	~MessageStoreProxy() {}
 
+	std::string getCollectionName(){
+		return m_collection;
+	}
 
 	template<typename MsgType>
 	std::string insert(const MsgType & _msg, const mongo::BSONObj & _meta = mongo::BSONObj(), const bool _wait = true) {
@@ -191,6 +194,20 @@ public:
 		return query<MsgType>(_messages, EMPTY_BSON_OBJ, meta_query, EMPTY_BSON_OBJ,  _find_one, _limit);
 	}
 
+
+	template<typename MsgType>
+	bool queryNamed(const std::string & _name,
+												const			std::string & _field_name,
+												std::vector< boost::shared_ptr<MsgType> > & _messages,
+												bool _find_one = true,
+												int _limit = 0) {
+
+
+		mongo::BSONObj meta_query = BSON( _field_name << _name );
+		return query<MsgType>(_messages, EMPTY_BSON_OBJ, meta_query, EMPTY_BSON_OBJ,  _find_one, _limit);
+	}
+
+
 	template<typename MsgType>
           std::pair<boost::shared_ptr<MsgType>, mongo::BSONObj> queryNamed(const std::string & _name, bool _find_one = true, int _limit = 0) {
 
@@ -250,7 +267,7 @@ public:
 					 msg.request.collection = m_collection;
 					 msg.request.type = get_ros_type<MsgType>();
 					 msg.request.single = _find_one;
-						msg.request.limit = _limit;
+					 msg.request.limit = _limit;
 											/*mongo::BSONObjBuilder objb;
 											objb.append("_id",-1);*/
 
@@ -261,14 +278,17 @@ public:
 				 }
 
 				 //if there's no meta then no copying is necessary
+
 				 if(!_meta_query.isEmpty()) {
-						 msg.request.meta_query.pairs.push_back(makePair(mongodb_store_msgs::MongoQueryMsgRequest::JSON_QUERY, _meta_query.jsonString()));
+					  msg.request.meta_query.pairs.push_back(makePair(mongodb_store_msgs::MongoQueryMsgRequest::JSON_QUERY, _meta_query.jsonString()));
 				 }
-											//if there's no sort message then no copying is necessary
-											if(!_sort_query.isEmpty()) {
-															 msg.request.sort_query.pairs.push_back(makePair(mongodb_store_msgs::MongoQueryMsgRequest::JSON_QUERY, _sort_query.jsonString()));
-											}
+				//if there's no sort message then no copying is necessary
+
+				if(!_sort_query.isEmpty()) {
+					msg.request.sort_query.pairs.push_back(makePair(mongodb_store_msgs::MongoQueryMsgRequest::JSON_QUERY, _sort_query.jsonString()));
+				}
 											//if there's no projection message then no copying is necessary
+
 
 					 if(m_queryClient.call(msg))
 					 {
