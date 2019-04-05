@@ -136,7 +136,6 @@ public:
 	template<typename MsgType>
 	std::string insertNamed(const std::string & _name, const MsgType & _msg,
 		const mongo::BSONObj & _meta = mongo::BSONObj(), const bool _wait = true) {
-
 		//create a copy of the meta data with the name included
 		mongo::BSONObjBuilder builder;
 		builder.appendElements(_meta);
@@ -145,18 +144,15 @@ public:
 		//and insert as usual
 		return insert(_msg, m_database, m_collection, builder.obj(), _wait);
 	}
-	
+
 
 	template<typename MsgType>
-	std::string insertNamed(const std::string & _name, const MsgType & _msg, 												
-		const			std::string & _field_name,
+	std::string insertNamed(const std::string & _field_name,const std::string & _name, const MsgType & _msg,
 		const mongo::BSONObj & _meta = mongo::BSONObj(), const bool _wait = true) {
-
 		//create a copy of the meta data with the name included
 		mongo::BSONObjBuilder builder;
 		builder.appendElements(_meta);
 		builder.append(_field_name, _name);
-
 		//and insert as usual
 		return insert(_msg, m_database, m_collection, builder.obj(), _wait);
 	}
