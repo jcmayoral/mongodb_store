@@ -158,6 +158,23 @@ public:
 	}
 
 
+
+	template<typename MsgType>
+	std::string insertNamed(const std::vector<std::string> & _field_names ,const std::vector<std::string> & _ids, const MsgType & _msg,
+		const mongo::BSONObj & _meta = mongo::BSONObj(), const bool _wait = true) {
+		//create a copy of the meta data with the name included
+		mongo::BSONObjBuilder builder;
+		//builder.appendElements(_meta);
+
+		for (int i = 0; i < _field_names.size(); i++){
+			builder.append(_field_names[i], _ids[i]);
+		}
+
+		//and insert as usual
+		return insert(_msg, m_database, m_collection, builder.obj(), _wait);
+	}
+
+
 	template<typename MsgType>
 	std::string insert(const MsgType & _msg,
 		const std::string & _database,
